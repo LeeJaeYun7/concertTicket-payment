@@ -9,6 +9,8 @@ import com.example.concertTicket_payment.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +52,12 @@ public class PaymentService {
             ));
         }
     }
+
+    @Retryable(
+            value = {CustomException.class},
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000, multiplier = 3)
+    )
     private boolean externalPaymentSystemCall(String uuid, long price) {
         return false;
     }
