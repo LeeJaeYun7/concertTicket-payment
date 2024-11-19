@@ -1,4 +1,4 @@
-package com.example.concertTicket_payment.payment.repository;
+package com.example.concertTicket_payment.payment.infrastructure.repository;
 
 import com.example.concertTicket_payment.payment.domain.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;

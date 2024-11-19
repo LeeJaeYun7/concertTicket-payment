@@ -5,10 +5,10 @@ import com.example.concertTicket_payment.common.ErrorCode;
 import com.example.concertTicket_payment.common.Loggable;
 import com.example.concertTicket_payment.payment.domain.Payment;
 import com.example.concertTicket_payment.payment.event.*;
-import com.example.concertTicket_payment.payment.repository.PaymentRepository;
+import com.example.concertTicket_payment.payment.infrastructure.kafka.producer.KafkaMessageProducer;
+import com.example.concertTicket_payment.payment.infrastructure.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final KafkaTemplate kafkaTemplate;
+    private final KafkaMessageProducer kafkaMessageProducer;
 
     @Transactional
-    @KafkaListener(topics = "payment-request-topic", groupId = "payment-service")
     public void createPayment(PaymentRequestEvent paymentRequestEvent){
+
         long concertId = paymentRequestEvent.getConcertId();
         long concertScheduleId = paymentRequestEvent.getConcertScheduleId();
         String uuid = paymentRequestEvent.getUuid();
@@ -34,7 +35,7 @@ public class PaymentService {
             boolean paymentSuccess = externalPaymentSystemCall(uuid, price);
 
             if (!paymentSuccess) {
-                kafkaTemplate.send("payment-failed-topic", new PaymentFailedEvent(
+                kafkaMessageProducer.sendPaymentEvent("payment-failed-topic", new PaymentFailedEvent(
                         concertId, concertScheduleId, uuid, seatNumber, price, "Payment system error"
                 ));
                 return;
@@ -43,11 +44,11 @@ public class PaymentService {
             Payment payment = Payment.of(concertId, concertScheduleId, uuid, price);
             paymentRepository.save(payment);
 
-            kafkaTemplate.send("payment-confirmed-topic", new PaymentConfirmedEvent(
+            kafkaMessageProducer.sendPaymentEvent("payment-confirmed-topic", new PaymentConfirmedEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price));
 
         } catch (Exception e) {
-            kafkaTemplate.send("payment-failed-topic", new PaymentFailedEvent(
+            kafkaMessageProducer.sendPaymentEvent("payment-failed-topic", new PaymentFailedEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price, "System error"
             ));
         }
@@ -59,11 +60,10 @@ public class PaymentService {
             backoff = @Backoff(delay = 1000, multiplier = 3)
     )
     private boolean externalPaymentSystemCall(String uuid, long price) {
-        return false;
+        return true;
     }
 
     @Transactional
-    @KafkaListener(topics = "payment-compensation-topic", groupId = "payment-service")
     public void handleCompensationEvent(PaymentRequestEvent paymentRequestEvent) {
         long concertId = paymentRequestEvent.getConcertId();
         long concertScheduleId = paymentRequestEvent.getConcertScheduleId();
@@ -77,11 +77,11 @@ public class PaymentService {
 
             paymentRepository.delete(payment);
 
-            kafkaTemplate.send("payment-compensation-success-topic", new PaymentCompensationSuccessEvent(
+            kafkaMessageProducer.sendPaymentEvent("payment-compensation-success-topic", new PaymentCompensationSuccessEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price, "Payment canceled successfully"
             ));
         } catch (Exception e) {
-            kafkaTemplate.send("payment-compensation-failed-topic", new PaymentCompensationFailedEvent(
+            kafkaMessageProducer.sendPaymentEvent("payment-compensation-failed-topic", new PaymentCompensationFailedEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price, "Compensation failed"
             ));
         }
