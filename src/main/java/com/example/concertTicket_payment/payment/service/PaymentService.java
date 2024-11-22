@@ -35,7 +35,7 @@ public class PaymentService {
             boolean paymentSuccess = externalPaymentSystemCall(uuid, price);
 
             if (!paymentSuccess) {
-                kafkaMessageProducer.sendPaymentEvent("payment-failed-topic", new PaymentFailedEvent(
+                kafkaMessageProducer.sendPaymentFailedEvent("payment-failed-topic", new PaymentFailedEvent(
                         concertId, concertScheduleId, uuid, seatNumber, price, "Payment system error"
                 ));
                 return;
@@ -44,11 +44,11 @@ public class PaymentService {
             Payment payment = Payment.of(concertId, concertScheduleId, uuid, price);
             paymentRepository.save(payment);
 
-            kafkaMessageProducer.sendPaymentEvent("payment-confirmed-topic", new PaymentConfirmedEvent(
+            kafkaMessageProducer.sendPaymentConfirmedEvent("payment-confirmed-topic", new PaymentConfirmedEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price));
 
         } catch (Exception e) {
-            kafkaMessageProducer.sendPaymentEvent("payment-failed-topic", new PaymentFailedEvent(
+            kafkaMessageProducer.sendPaymentFailedEvent("payment-failed-topic", new PaymentFailedEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price, "System error"
             ));
         }
@@ -77,11 +77,11 @@ public class PaymentService {
 
             paymentRepository.delete(payment);
 
-            kafkaMessageProducer.sendPaymentEvent("payment-compensation-success-topic", new PaymentCompensationSuccessEvent(
+            kafkaMessageProducer.sendPaymentCompensationSuccessEvent("payment-compensation-success-topic", new PaymentCompensationSuccessEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price, "Payment canceled successfully"
             ));
         } catch (Exception e) {
-            kafkaMessageProducer.sendPaymentEvent("payment-compensation-failed-topic", new PaymentCompensationFailedEvent(
+            kafkaMessageProducer.sendPaymentCompensationFailedEvent("payment-compensation-failed-topic", new PaymentCompensationFailedEvent(
                     concertId, concertScheduleId, uuid, seatNumber, price, "Compensation failed"
             ));
         }

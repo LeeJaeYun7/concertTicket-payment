@@ -16,8 +16,6 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
-
-
   kafka:
     producer:
       bootstrap-servers: localhost:9092
@@ -27,6 +25,7 @@ spring:
     consumer:
       bootstrap-servers: localhost:9092
       group-id: my_group
+      enable-auto-commit: false
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
