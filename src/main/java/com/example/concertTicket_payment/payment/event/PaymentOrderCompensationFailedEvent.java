@@ -5,18 +5,19 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class PaymentRequestEvent {
+public class PaymentOrderCompensationFailedEvent {
+
     private long concertId;
     private long concertScheduleId;
     private String uuid;
-    private long seatNumber;
-    private long price;
+    private long totalPrice;
+    private String message;
 
-    public PaymentRequestEvent(long concertId, long concertScheduleId, String uuid, long seatNumber, long price){
+    public PaymentOrderCompensationFailedEvent(long concertId, long concertScheduleId, String uuid, long totalPrice, String message){
         this.concertId = concertId;
         this.concertScheduleId = concertScheduleId;
         this.uuid = uuid;
-        this.seatNumber = seatNumber;
-        this.price = price;
+        this.totalPrice = totalPrice;
+        this.message = message;
     }
 }
