@@ -9,12 +9,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentFailedEvent {
+public class PaymentOrderFailedEvent {
 
     private long concertId;
     private long concertScheduleId;
     private String uuid;
-    private long seatNumber;
-    private long price;
+    private long totalPrice;
     private String errorMessage;
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "payment")
-public class Payment extends BaseTimeEntity {
+public class PaymentEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Payment extends BaseTimeEntity {
     private long amount;
 
     @Builder
-    public Payment(long concertId, long concertScheduleId, String uuid, long amount){
+    public PaymentEntity(long concertId, long concertScheduleId, String uuid, long amount){
         this.concertId = concertId;
         this.concertScheduleId = concertScheduleId;
         this.uuid = uuid;
@@ -36,12 +36,12 @@ public class Payment extends BaseTimeEntity {
         this.setUpdatedAt(LocalDateTime.now());
     }
 
-    public static Payment of(long concertId, long concertScheduleId, String uuid, long amount){
-        return Payment.builder()
-                .concertId(concertId)
-                .concertScheduleId(concertScheduleId)
-                .uuid(uuid)
-                .amount(amount)
-                .build();
+    public static PaymentEntity of(long concertId, long concertScheduleId, String uuid, long amount){
+        return PaymentEntity.builder()
+                            .concertId(concertId)
+                            .concertScheduleId(concertScheduleId)
+                            .uuid(uuid)
+                            .amount(amount)
+                            .build();
     }
 }

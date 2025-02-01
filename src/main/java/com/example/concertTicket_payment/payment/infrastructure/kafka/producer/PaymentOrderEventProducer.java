@@ -1,9 +1,9 @@
 package com.example.concertTicket_payment.payment.infrastructure.kafka.producer;
 
-import com.example.concertTicket_payment.payment.event.PaymentCompensationFailedEvent;
-import com.example.concertTicket_payment.payment.event.PaymentCompensationSuccessEvent;
-import com.example.concertTicket_payment.payment.event.PaymentConfirmedEvent;
-import com.example.concertTicket_payment.payment.event.PaymentFailedEvent;
+import com.example.concertTicket_payment.payment.event.PaymentOrderCompensationFailedEvent;
+import com.example.concertTicket_payment.payment.event.PaymentOrderCompensationSuccessEvent;
+import com.example.concertTicket_payment.payment.event.PaymentOrderConfirmedEvent;
+import com.example.concertTicket_payment.payment.event.PaymentOrderFailedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,12 +12,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 @Component
 @RequiredArgsConstructor
-public class KafkaMessageProducer {
+public class PaymentOrderEventProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public void sendPaymentConfirmedEvent(String topic, PaymentConfirmedEvent event) {
+    public void sendPaymentOrderConfirmedEvent(String topic, PaymentOrderConfirmedEvent event) {
         try {
             String eventJson = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(topic, eventJson);
@@ -26,7 +26,7 @@ public class KafkaMessageProducer {
         }
     }
 
-    public void sendPaymentFailedEvent(String topic, PaymentFailedEvent event) {
+    public void sendPaymentOrderFailedEvent(String topic, PaymentOrderFailedEvent event) {
         try {
             String eventJson = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(topic, eventJson);
@@ -35,7 +35,7 @@ public class KafkaMessageProducer {
         }
     }
 
-    public void sendPaymentCompensationSuccessEvent(String topic, PaymentCompensationSuccessEvent event) {
+    public void sendPaymentCompensationSuccessEvent(String topic, PaymentOrderCompensationSuccessEvent event) {
         try {
             String eventJson = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(topic, eventJson);
@@ -44,7 +44,7 @@ public class KafkaMessageProducer {
         }
     }
 
-    public void sendPaymentCompensationFailedEvent(String topic, PaymentCompensationFailedEvent event) {
+    public void sendPaymentCompensationFailedEvent(String topic, PaymentOrderCompensationFailedEvent event) {
         try {
             String eventJson = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(topic, eventJson);
